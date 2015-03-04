@@ -1,0 +1,19 @@
+{
+  "name": "virtualdom-state-renderer",
+  "description": "A Virtual-DOM based rendering layer for the abstract-state-router",
+  "version": "0.0.1",
+  "repository": {
+    "url": "https://github.com/ArtskydJ/virtualdom-state-renderer.git"
+  },
+  "keywords": [
+    "virtual",
+    "dom",
+    "state",
+    "router",
+    "renderer"
+  ],
+  "main": "index.js",
+  "scripts": {},
+  "dependencies": {},
+  "devDependencies": {}
+}
