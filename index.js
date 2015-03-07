@@ -14,15 +14,21 @@ function wrapTryCatch(cb, fn) {
 	}
 }
 
+function killEvent(ev) {
+	ev.preventDefault()
+	ev.stopPropagation()
+}
+
 module.exports = function VirtualdomStateRenderer(defaultTemplateContext) {
-	var defaultState = xtend(defaultTemplateContext)
+	var state = xtend(defaultTemplateContext)
 	return function makeRenderer(stateRouter) {
 		var helpers = {
 			makePath: stateRouter.makePath,
-			active: function active(stateName) {
-				var isActive = stateRouter.stateIsActive(stateName)
+			active: function active(stateName, params) {
+				var isActive = stateRouter.stateIsActive(stateName, params)
 				return { class: isActive ? 'active' : '' }
-			}
+			},
+			killEvent: killEvent
 		}
 		return {
 			render: function render(renderContext, cb) {
@@ -33,24 +39,28 @@ module.exports = function VirtualdomStateRenderer(defaultTemplateContext) {
 					if (typeof parentEl === 'string') {
 						parentEl = document.querySelector(parentEl)
 					}
-					var state = xtend(defaultState, content)
 
-					// template -> tree -> el
-					var currentTree = template(h, state)
+					function makeTree(newState) {
+						if (typeof newState === 'object') {
+							state = xtend(state, newState)
+						}
+						return template(h, state, xtend(helpers, { update: update }))
+					}
+
+					var currentTree = makeTree(content)
 					var el = createElement(currentTree)
 					parentEl.appendChild(el)
 
 					function update(newState) {
-						state = xtend(state, newState)
-						var newTree = template(h, state)
+						var newTree = makeTree(newState)
 						var patches = diff(currentTree, newTree)
 						el = patch(el, patches)
 						currentTree = newTree
 					}
 
-					stateRouter.on('stateChangeEnd', function (stateName, params) {
-						update()
-					})
+					stateRouter.on('stateChangeEnd', update)
+
+					console.log('renderer.render')
 
 					return {
 						update: update,
@@ -64,10 +74,12 @@ module.exports = function VirtualdomStateRenderer(defaultTemplateContext) {
 					var domApi = resetContext.domApi
 					stateRouter.removeListener('stateChangeEnd', domApi.update)
 					domApi.state = null
+					console.log('renderer.reset')
 				})
 			},
 			destroy: function destroy(domApi, cb) {
 				domApi.el.outerHTML = ""
+				console.log('renderer.destroy')
 				cb(null)
 			},
 			getChildElement: function getChildElement(domApi, cb) {
