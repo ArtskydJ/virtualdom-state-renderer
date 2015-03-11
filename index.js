@@ -30,12 +30,13 @@ module.exports = function VirtualdomStateRenderer(defaultTemplateContext) {
 			},
 			killEvent: killEvent
 		}
+
 		return {
 			render: function render(renderContext, cb) {
 				wrapTryCatch(cb, function () {
 					var parentEl = renderContext.element
 					var template = renderContext.template // Template is a function returning a hyperscript tree
-					var content = renderContext.content
+					var content = renderContext.content // This is from the resolve function
 					if (typeof parentEl === 'string') {
 						parentEl = document.querySelector(parentEl)
 					}
@@ -58,10 +59,6 @@ module.exports = function VirtualdomStateRenderer(defaultTemplateContext) {
 						currentTree = newTree
 					}
 
-					stateRouter.on('stateChangeEnd', update)
-
-					console.log('renderer.render')
-
 					return {
 						update: update,
 						state: state,
@@ -72,14 +69,13 @@ module.exports = function VirtualdomStateRenderer(defaultTemplateContext) {
 			reset: function reset(resetContext, cb) {
 				wrapTryCatch(cb, function () {
 					var domApi = resetContext.domApi
-					stateRouter.removeListener('stateChangeEnd', domApi.update)
+					var content = resetContext.content
 					domApi.state = null
-					console.log('renderer.reset')
+					domApi.update(content)
 				})
 			},
 			destroy: function destroy(domApi, cb) {
 				domApi.el.outerHTML = ""
-				console.log('renderer.destroy')
 				cb(null)
 			},
 			getChildElement: function getChildElement(domApi, cb) {
