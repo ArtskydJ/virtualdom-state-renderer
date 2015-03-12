@@ -53,6 +53,7 @@ module.exports = function VirtualdomStateRenderer(defaultTemplateContext) {
 					parentEl.appendChild(el)
 
 					function update(newState) {
+						if (newState && newState.topicId) console.log('newState.topicId', newState.topicId)
 						var newTree = makeTree(newState)
 						var patches = diff(currentTree, newTree)
 						el = patch(el, patches)
