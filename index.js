@@ -37,7 +37,7 @@ module.exports = function VirtualdomStateRenderer() {
 			makePath: stateRouter.makePath,
 			active: function active(stateName, params) {
 				var isActive = stateRouter.stateIsActive(stateName, params)
-				return { class: isActive ? 'active' : '' }
+				return (isActive ? 'active' : '')
 			},
 			killEvent: killEvent
 		}
@@ -55,10 +55,10 @@ module.exports = function VirtualdomStateRenderer() {
 
 					var domApi = Object.create(emitter)
 
-					domApi.hookUpUpdateFunction = hookUpUpdateFunction.bind(null, domApi, update)
+					domApi.hookUpUpdateFunction = hookUpUpdateFunction.bind(null, domApi, update) // why is this on the domApi?
 
 					domApi.sharedState = xtend(originalResolveContent)
-					domApi.hookUpUpdateFunction(originalResolveContent)
+					domApi.hookUpUpdateFunction()
 
 					function makeTree(sharedState) {
 						return template(h, sharedState, xtend(templateHelpers, { emitter: emitter }))
@@ -69,6 +69,7 @@ module.exports = function VirtualdomStateRenderer() {
 					parentEl.appendChild(el)
 
 					function update(resolveContent) {
+						emitter.emit('update')
 						var newTree = makeTree(resolveContent)
 						var patches = diff(currentTree, newTree)
 						el = patch(el, patches)
@@ -85,7 +86,7 @@ module.exports = function VirtualdomStateRenderer() {
 					var domApi = resetContext.domApi
 					var content = resetContext.content
 					domApi.sharedState = xtend(content)
-					domApi.hookUpUpdateFunction(content)
+					domApi.hookUpUpdateFunction()
 					domApi.removeAllListeners()
 					domApi.update()
 				})
