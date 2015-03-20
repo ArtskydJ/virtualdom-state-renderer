@@ -95,7 +95,7 @@ module.exports = function makeRenderer(stateRouter) {
 		},
 		destroy: function destroy(domApi, cb) {
 			domApi.el.outerHTML = ""
-			domApi.removeAllListeners()
+			domApi.emitter.removeAllListeners()
 			stateRouter.removeListener('stateChangeEnd', domApi.update)
 			cb(null)
 		},
