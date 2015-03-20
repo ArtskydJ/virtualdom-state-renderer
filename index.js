@@ -63,7 +63,7 @@ module.exports = function makeRenderer(stateRouter) {
 				parentEl.appendChild(domApi.el)
 
 				// why is this on the domApi?
-				domApi.hookUpUpdateFunction = hookUpUpdateFunction.bind(null, domApi, update) // being bound might cause problems?
+				domApi.hookUpUpdateFunction = hookUpUpdateFunction.bind(null, domApi, update)
 				domApi.hookUpUpdateFunction()
 
 				return domApi
