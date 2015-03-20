@@ -45,7 +45,6 @@ module.exports = function VirtualdomStateRenderer() {
 		return {
 			render: function render(renderContext, cb) {
 				wrapTryCatch(cb, function () {
-					var emitter = new EventEmitter()
 					var parentEl = renderContext.element
 					var template = renderContext.template // Template is a function returning a hyperscript tree
 					var originalResolveContent = renderContext.content
@@ -53,7 +52,8 @@ module.exports = function VirtualdomStateRenderer() {
 						parentEl = document.querySelector(parentEl)
 					}
 
-					var domApi = Object.create(emitter)
+					var domApi = {}
+					domApi.emitter = new EventEmitter()
 
 					domApi.hookUpUpdateFunction = hookUpUpdateFunction.bind(null, domApi, update) // why is this on the domApi?
 
@@ -61,7 +61,7 @@ module.exports = function VirtualdomStateRenderer() {
 					domApi.hookUpUpdateFunction()
 
 					function makeTree(sharedState) {
-						return template(h, sharedState, xtend(templateHelpers, { emitter: emitter }))
+						return template(h, sharedState, xtend(templateHelpers, { emitter: domApi.emitter }))
 					}
 
 					var currentTree = makeTree(originalResolveContent)
@@ -69,7 +69,7 @@ module.exports = function VirtualdomStateRenderer() {
 					parentEl.appendChild(el)
 
 					function update(resolveContent) {
-						emitter.emit('update')
+						domApi.emitter.emit('update')
 						var newTree = makeTree(resolveContent)
 						var patches = diff(currentTree, newTree)
 						el = patch(el, patches)
@@ -87,7 +87,7 @@ module.exports = function VirtualdomStateRenderer() {
 					var content = resetContext.content
 					domApi.sharedState = xtend(content)
 					domApi.hookUpUpdateFunction()
-					domApi.removeAllListeners()
+					domApi.emitter.removeAllListeners()
 					domApi.update()
 				})
 			},
