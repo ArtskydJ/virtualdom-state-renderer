@@ -46,7 +46,7 @@ module.exports = function makeRenderer(stateRouter) {
 		render: function render(renderContext, cb) {
 			wrapTryCatch(cb, function () {
 				var parentEl = renderContext.element
-				var template = renderContext.template // Template is a function returning a hyperscript tree
+				var template = renderContext.template // Templates are functions returning hyperscript trees
 				var originalResolveContent = renderContext.content
 				if (typeof parentEl === 'string') {
 					parentEl = document.querySelector(parentEl)
