@@ -2,7 +2,7 @@ var h = require('virtual-dom/h')
 var diff = require('virtual-dom/diff')
 var patch = require('virtual-dom/patch')
 var createElement = require('virtual-dom/create-element')
-var xtend = require('xtend')
+var shallowCopy = require('xtend')
 var EventEmitter = require('events').EventEmitter
 
 function wrapTryCatch(cb, fn) {
@@ -39,7 +39,7 @@ module.exports = function makeRenderer(stateRouter) {
 
 				var domApi = {
 					emitter: new EventEmitter(),
-					sharedState: xtend(originalResolveContent),
+					sharedState: shallowCopy(originalResolveContent),
 					update: update,
 					el: null
 				}
@@ -53,7 +53,7 @@ module.exports = function makeRenderer(stateRouter) {
 				return domApi
 
 				function makeTree() {
-					var state = xtend(domApi.sharedState)
+					var state = shallowCopy(domApi.sharedState)
 					var templateHelpers = {
 						makePath: stateRouter.makePath,
 						isActive: stateRouter.stateIsActive,
@@ -77,7 +77,7 @@ module.exports = function makeRenderer(stateRouter) {
 			wrapTryCatch(cb, function () {
 				var domApi = resetContext.domApi
 				var content = resetContext.content
-				domApi.sharedState = xtend(content)
+				domApi.sharedState = shallowCopy(content)
 				domApi.emitter.removeAllListeners()
 				domApi.update()
 			})
