@@ -22,24 +22,9 @@ function killEvent(ev) {
 
 module.exports = function makeRenderer(stateRouter) {
 
-	function hookUpUpdateFunction(domApi, update) {
-		if (domApi.update) {
-			stateRouter.removeListener('stateChangeEnd', domApi.update)
-		}
-		domApi.update = function () {
-			update(domApi.sharedState)
-		}
-		stateRouter.on('stateChangeEnd', domApi.update)
-	}
-
-	var templateHelpers = {
-		makePath: stateRouter.makePath,
-		isActive: stateRouter.stateIsActive,
-		active: function active(stateName, params) {
-			var isActive = stateRouter.stateIsActive(stateName, params)
-			return (isActive ? 'active' : '')
-		},
-		killEvent: killEvent
+	function active(stateName, params) {
+		var isActive = stateRouter.stateIsActive(stateName, params)
+		return (isActive ? 'active' : '')
 	}
 
 	return {
@@ -55,28 +40,33 @@ module.exports = function makeRenderer(stateRouter) {
 				var domApi = {
 					emitter: new EventEmitter(),
 					sharedState: xtend(originalResolveContent),
+					update: update,
 					el: null
 				}
 
-				var currentTree = makeTree(originalResolveContent)
+				var currentTree = makeTree()
 				domApi.el = createElement(currentTree)
 				parentEl.appendChild(domApi.el)
 
-				// why is this on the domApi?
-				domApi.hookUpUpdateFunction = hookUpUpdateFunction.bind(null, domApi, update)
-				domApi.hookUpUpdateFunction()
+				stateRouter.on('stateChangeEnd', domApi.update)
 
 				return domApi
 
-
-				function makeTree(sharedState) {
-					return template(h, sharedState, xtend(templateHelpers, { emitter: domApi.emitter }))
+				function makeTree() {
+					var state = xtend(domApi.sharedState)
+					var templateHelpers = {
+						makePath: stateRouter.makePath,
+						isActive: stateRouter.stateIsActive,
+						active: active,
+						killEvent: killEvent,
+						emitter: domApi.emitter
+					}
+					return template(h, state, templateHelpers)
 				}
 
-				function update(resolveContent) {
+				function update() { // Like `git pull` for the DOM
 					domApi.emitter.emit('evaluating template')
-					// Should this update domApi.sharedState?
-					var newTree = makeTree(resolveContent)
+					var newTree = makeTree()
 					var patches = diff(currentTree, newTree)
 					domApi.el = patch(domApi.el, patches)
 					currentTree = newTree
@@ -88,13 +78,12 @@ module.exports = function makeRenderer(stateRouter) {
 				var domApi = resetContext.domApi
 				var content = resetContext.content
 				domApi.sharedState = xtend(content)
-				domApi.hookUpUpdateFunction()
 				domApi.emitter.removeAllListeners()
 				domApi.update()
 			})
 		},
 		destroy: function destroy(domApi, cb) {
-			domApi.el.outerHTML = ""
+			domApi.el.outerHTML = ''
 			domApi.emitter.removeAllListeners()
 			stateRouter.removeListener('stateChangeEnd', domApi.update)
 			cb(null)
