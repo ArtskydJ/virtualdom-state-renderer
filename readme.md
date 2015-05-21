@@ -1,3 +1,9 @@
+virtualdom-state-renderer
+=========================
+
+[![Dependency Status](https://david-dm.org/artskydj/virtualdom-state-renderer.svg)](https://david-dm.org/artskydj/virtualdom-state-renderer)
+[![devDependency Status](https://david-dm.org/artskydj/virtualdom-state-renderer/dev-status.svg)](https://david-dm.org/artskydj/virtualdom-state-renderer#info=devDependencies)
+
 Use [virtual-dom][v-dom] with [abstract-state-router][asr]!
 
 # example
