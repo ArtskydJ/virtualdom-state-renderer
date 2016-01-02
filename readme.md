@@ -1,14 +1,11 @@
 virtualdom-state-renderer
 =========================
 
-[![Dependency Status](https://david-dm.org/artskydj/virtualdom-state-renderer.svg)](https://david-dm.org/artskydj/virtualdom-state-renderer)
-[![devDependency Status](https://david-dm.org/artskydj/virtualdom-state-renderer/dev-status.svg)](https://david-dm.org/artskydj/virtualdom-state-renderer#info=devDependencies)
-
-Use [virtual-dom][v-dom] with [abstract-state-router][asr]!
+> Use [virtual-dom][v-dom] with [abstract-state-router][asr]!
 
 # example
 
-index.js
+*index.js*
 ```js
 var StateRouter = require('abstract-state-router')
 var virtualdomRenderer = require('virtualdom-state-renderer')
@@ -28,7 +25,7 @@ domready(function() {
 })
 ```
 
-template.js
+*template.js*
 ```js
 module.exports = function template(h, resolveContent, helpers) {
 	return (
